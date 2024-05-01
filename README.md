@@ -19,4 +19,4 @@ DIN-Rail mount
 Expansions Supported
 
 Datasheet:   https://norvi.lk/docs/norvi-gsm-ae02-i-g-datasheet/
-User Guide:  https://norvi.lk/docs/norvi-gsm-ae02-i-g-user-guide/
+User Guide:  https://norvi.lk/docs/norvi-gsm-ae02-i-g-user-guide/  
