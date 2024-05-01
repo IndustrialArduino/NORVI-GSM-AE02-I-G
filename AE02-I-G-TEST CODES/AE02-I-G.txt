@@ -11,7 +11,7 @@
  * 
   Turns ON All Outputs in series
   Serial prints all the input status
-  SIM800C External Antenna Test
+  SIM800C External Antenna Test   
   
  *   
  * 
