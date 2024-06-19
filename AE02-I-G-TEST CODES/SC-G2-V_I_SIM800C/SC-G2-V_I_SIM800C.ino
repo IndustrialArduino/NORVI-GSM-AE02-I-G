@@ -1,6 +1,6 @@
 /*
  * RTC Check
- * micro SD Card Check CS : 15
+ * micro SD Card Check 
  * RS485
  * SIM800C
  * All Output Turn ON Series
@@ -36,7 +36,6 @@
 
 #define GSM_RX 33
 #define GSM_TX 32
-#define GSM_RESET 21
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
@@ -150,7 +149,8 @@ void loop() {
   Serial.print("AIN4: "); Serial.print(adc3); Serial.println("  ");
 
   Serial.println(""); 
-  Serial.print("Push button  ");Serial.println(readSwitch());
+  Serial.print("Push button  ");
+  Serial.println(readSwitch());
   Serial.println(""); 
   
   digitalWrite(OUTPUT1, HIGH);
@@ -163,6 +163,5 @@ void loop() {
   digitalWrite(OUTPUT2, LOW);
    
   Serial1.println("Hello RS-485");
- //Serial2.println("AT");
   delay(1000);
 }
