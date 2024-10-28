@@ -31,7 +31,7 @@
 #define OUTPUT2 2
 
 #define RS485_RX 25
-#define RS485_TX 26
+#define RS485_TX 19
 #define RS485_FC 22
 
 #define GSM_RX 33
