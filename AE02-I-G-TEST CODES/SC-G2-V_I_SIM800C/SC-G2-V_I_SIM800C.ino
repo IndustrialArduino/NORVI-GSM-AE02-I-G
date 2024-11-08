@@ -1,16 +1,13 @@
 /*
+ * 
+ * AE02 GSM I FINAL 
  * RTC Check
- * micro SD Card Check 
  * RS485
  * SIM800C
  * All Output Turn ON Series
  * All input status serial print
- * Turns ON All Outputs in series
- * Serial prints all the input status
- * SIM800C External Antenna Test 
- */
 
-#include <SPI.h>
+ */
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
@@ -20,7 +17,7 @@
 
 #define INPUT1 35
 #define INPUT2 34
-#define INPUT3 39
+#define INPUT3 21
 #define INPUT4 14
 #define INPUT5 13
 #define INPUT6 4
@@ -43,23 +40,34 @@
 #define OLED_RESET     -1 // Reset pin # (or -1 if sharing Arduino reset pin)
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
+float shunt_resistance = 100.0; // Ohms
+float load_resistance = 10.0; // Load resistor
+
 Adafruit_ADS1115 ads1;
+
 int analog_value = 0;
-  
+
 int readSwitch(){
   analog_value = analogRead(ANALOG_PIN_0);
-  return analog_value; //Read analog
+
+ 
+  return analog_value     ; //Read analog
+  
 }
+
 unsigned long int timer1 = 0;
-// ================================================ SETUP ================================================
+
+
 void setup() {
+ 
   Serial.begin(115200);
+
   Serial.println("Hello");
   Serial1.begin(9600, SERIAL_8N1, RS485_RX, RS485_TX); 
-  Serial2.begin(9600, SERIAL_8N1, GSM_RX, GSM_TX); 
-
+  Serial2.begin(9600, SERIAL_8N1, GSM_TX, GSM_RX); 
+ 
   pinMode(RS485_FC, OUTPUT);
-  digitalWrite(RS485_FC, HIGH);   // RS-485 
+  digitalWrite(RS485_FC, HIGH);  
   
   pinMode(OUTPUT1, OUTPUT);
   pinMode(OUTPUT2, OUTPUT);
@@ -85,7 +93,10 @@ void setup() {
     Serial.println("Failed to initialize ADS 1 .");
     while (1);
   }
+    ads1.setGain(GAIN_ONE);  
+
   Serial.println("Testing Modem");
+  
   timer1 = millis();
   Serial2.println("AT");
   while(millis()<timer1+10000){
@@ -94,6 +105,7 @@ void setup() {
     Serial.write(inByte);
     }
   }
+
   timer1 = millis();
   Serial2.println("AT+CPIN?");
   while(millis()<timer1+10000){
@@ -103,65 +115,90 @@ void setup() {
     }
   }
   timer1 = millis();
-  Serial2.println("AT+CFUN?");
+  Serial2.println("AT+GSN");
   while(millis()<timer1+10000){
     while (Serial2.available()) {
     int inByte = Serial2.read();
     Serial.write(inByte);
     }
   }
-  Serial.println("Testing Modem Done"); 
-  adcAttachPin(36);
-  digitalWrite(RS485_FC, HIGH);   // RS-485 
+   Serial.println("Testing Modem Done");
+
+  digitalWrite(RS485_FC, HIGH);  
+  
 }
+
+
 void loop() {
-  int16_t adc0, adc1, adc2, adc3;
-  float volts0, volts1, volts2, volts3;
-  // read from port 0, send to port 1:
-  while (Serial.available()) {
+
+ int16_t adc0, adc1, adc2, adc3;
+
+
+ while (Serial.available()) {
     int inByte = Serial.read();
     Serial2.write(inByte);
   }
+
   while (Serial2.available()) {
     int inByte = Serial2.read();
     Serial.write(inByte);
   }
- 
-  Serial.print(digitalRead(INPUT1));
-  Serial.print(digitalRead(INPUT2));
-  Serial.print(digitalRead(INPUT3));
-  Serial.print(digitalRead(INPUT4));
-  Serial.print(digitalRead(INPUT5));
-  Serial.print(digitalRead(INPUT6));
-  Serial.print(digitalRead(INPUT7));
-  Serial.print(digitalRead(INPUT8));
-  Serial.println(""); 
+  delay(200);
   
+
+  Serial.print(digitalRead(INPUT1));Serial.print(digitalRead(INPUT2));Serial.print(digitalRead(INPUT3));Serial.print(digitalRead(INPUT4));Serial.print(digitalRead(INPUT5));Serial.print(digitalRead(INPUT6));Serial.print(digitalRead(INPUT7));Serial.print(digitalRead(INPUT8));
+  Serial.println(""); 
+
   adc0 = ads1.readADC_SingleEnded(0);
   adc1 = ads1.readADC_SingleEnded(1);
   adc2 = ads1.readADC_SingleEnded(2);
   adc3 = ads1.readADC_SingleEnded(3);
+ 
+  float voltage0 = adc0 * 0.155/ 1000*500; 
+  float voltage1 = adc1 * 0.155 / 1000*500; 
+  float voltage2 = adc2 * 0.155/ 1000*500; 
+  float voltage3 = adc3 * 0.155 / 1000*500; 
 
-  Serial.println("-----------------------------------------------------------");
-  Serial.print("AIN1: "); Serial.print(adc0); Serial.println("  ");
-  Serial.print("AIN2: "); Serial.print(adc1); Serial.println("  ");
-  Serial.print("AIN3: "); Serial.print(adc2); Serial.println("  ");
-  Serial.print("AIN4: "); Serial.print(adc3); Serial.println("  ");
+  float current0 = voltage0 / shunt_resistance;
+  float current1 = voltage1 / shunt_resistance;
+  float current2 = voltage2 / shunt_resistance;
+  float current3 = voltage3 / shunt_resistance;
+
+  Serial.print("Current 0  : "); Serial.print(current0); Serial.println(" mA");
+  Serial.print("Current 1  : "); Serial.print(current1); Serial.println(" mA");
+  Serial.print("Current 2  : "); Serial.print(current2); Serial.println(" mA");
+  Serial.print("Current 3  : "); Serial.print(current3); Serial.println(" mA");
 
   Serial.println(""); 
-  Serial.print("Push button  ");
-  Serial.println(readSwitch());
+  Serial.print("Push button  ");Serial.println(readSwitch());
   Serial.println(""); 
+
   
   digitalWrite(OUTPUT1, HIGH);
   digitalWrite(OUTPUT2, LOW);
-  delay(500);
+  delay(150);
   digitalWrite(OUTPUT1, LOW);
   digitalWrite(OUTPUT2, HIGH);
-  delay(500);
+  delay(150);
   digitalWrite(OUTPUT1, LOW);
   digitalWrite(OUTPUT2, LOW);
    
-  Serial1.println("Hello RS-485");
-  delay(1000);
+  digitalWrite(RS485_FC, HIGH);                   
+  delay(100);
+  Serial1.println(F("RS485 01 SUCCESS"));   
+  delay(100);                                
+  digitalWrite(RS485_FC, LOW) ;                    
+
+                                             
+  delay(100);     
+  
+  while (Serial1.available()) {  
+    char c = Serial1.read();     
+    Serial.write(c);             
+  }
+   
+ delay(100);
+ 
+ Serial.println("-----------------------------------------------------------------------");
+ 
 }
